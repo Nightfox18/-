@@ -1,0 +1,108 @@
+{% extends 'base.html' %}
+
+{% block title %}Список записей{% endblock %}
+
+{% block content %}
+<h2>Записи ДДС</h2>
+
+<form method="get" class="row g-3 mb-4">
+    <div class="col-md-2">
+        <label>Дата с</label>
+        <input type="date" name="date_from" class="form-control" value="{{ filters.date_from }}">
+    </div>
+    <div class="col-md-2">
+        <label>Дата по</label>
+        <input type="date" name="date_to" class="form-control" value="{{ filters.date_to }}">
+    </div>
+    <div class="col-md-2">
+        <label>Статус</label>
+        <select name="status" class="form-select">
+            <option value="">Все</option>
+            {% for s in statuses %}
+                <option value="{{ s.id }}" {% if filters.status == s.id|stringformat:"s" %}selected{% endif %}>{{ s.name }}</option>
+            {% endfor %}
+        </select>
+    </div>
+    <div class="col-md-2">
+        <label>Тип</label>
+        <select name="type" class="form-select">
+            <option value="">Все</option>
+            {% for t in types %}
+                <option value="{{ t.id }}" {% if filters.type == t.id|stringformat:"s" %}selected{% endif %}>{{ t.name }}</option>
+            {% endfor %}
+        </select>
+    </div>
+    <div class="col-md-2">
+        <label>Категория</label>
+        <select name="category" class="form-select">
+            <option value="">Все</option>
+            {% for c in categories %}
+                <option value="{{ c.id }}" {% if filters.category == c.id|stringformat:"s" %}selected{% endif %}>{{ c.name }}</option>
+            {% endfor %}
+        </select>
+    </div>
+    <div class="col-md-2">
+        <label>Подкатегория</label>
+        <select name="subcategory" class="form-select">
+            <option value="">Все</option>
+            {% for sc in subcategories %}
+                <option value="{{ sc.id }}" {% if filters.subcategory == sc.id|stringformat:"s" %}selected{% endif %}>{{ sc.name }}</option>
+            {% endfor %}
+        </select>
+    </div>
+    <div class="col-md-12">
+        <button type="submit" class="btn btn-primary">Применить фильтры</button>
+        <a href="{% url 'transaction_list' %}" class="btn btn-secondary">Сбросить</a>
+    </div>
+</form>
+
+<table class="table table-striped table-hover">
+    <thead>
+        <tr>
+            <th>Дата</th>
+            <th>Статус</th>
+            <th>Тип</th>
+            <th>Категория</th>
+            <th>Подкатегория</th>
+            <th>Сумма</th>
+            <th>Комментарий</th>
+            <th>Действия</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for t in transactions %}
+        <tr>
+            <td>{{ t.date|date:"d.m.Y" }}</td>
+            <td>{{ t.status.name }}</td>
+            <td>{{ t.type.name }}</td>
+            <td>{{ t.category.name }}</td>
+            <td>{{ t.subcategory.name }}</td>
+            <td>{{ t.amount }} руб.</td>
+            <td>{{ t.comment|truncatechars:50 }}</td>
+            <td>
+                <a href="{% url 'transaction_edit' t.id %}" class="btn btn-sm btn-warning">✏️</a>
+                <a href="{% url 'transaction_delete' t.id %}" class="btn btn-sm btn-danger">🗑️</a>
+            </td>
+        </tr>
+        {% empty %}
+        <tr><td colspan="8" class="text-center">Нет записей</td></tr>
+        {% endfor %}
+    </tbody>
+</table>
+
+{% if transactions.has_other_pages %}
+<nav>
+    <ul class="pagination">
+        {% if transactions.has_previous %}
+            <li class="page-item"><a class="page-link" href="?page=1{% for key, value in filters.items %}{% if value %}&{{ key }}={{ value }}{% endif %}{% endfor %}">« Первая</a></li>
+            <li class="page-item"><a class="page-link" href="?page={{ transactions.previous_page_number }}{% for key, value in filters.items %}{% if value %}&{{ key }}={{ value }}{% endif %}{% endfor %}">‹ Предыдущая</a></li>
+        {% endif %}
+        <li class="page-item active"><span class="page-link">{{ transactions.number }} из {{ transactions.paginator.num_pages }}</span></li>
+        {% if transactions.has_next %}
+            <li class="page-item"><a class="page-link" href="?page={{ transactions.next_page_number }}{% for key, value in filters.items %}{% if value %}&{{ key }}={{ value }}{% endif %}{% endfor %}">Следующая ›</a></li>
+            <li class="page-item"><a class="page-link" href="?page={{ transactions.paginator.num_pages }}{% for key, value in filters.items %}{% if value %}&{{ key }}={{ value }}{% endif %}{% endfor %}">Последняя »</a></li>
+        {% endif %}
+    </ul>
+</nav>
+{% endif %}
+{% endblock %}

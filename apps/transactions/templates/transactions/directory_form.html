@@ -1,0 +1,41 @@
+{% extends 'base.html' %}
+
+{% block title %}
+    {% if obj %}Редактирование{% else %}Создание{% endif %} {{ verbose_name }}
+{% endblock %}
+
+{% block content %}
+<h2>{% if obj %}Редактирование{% else %}Создание{% endif %} {{ verbose_name }}</h2>
+
+<form method="post">
+    {% csrf_token %}
+    <div class="mb-3">
+        <label class="form-label">Название</label>
+        <input type="text" name="name" class="form-control" value="{{ obj.name|default:'' }}" required>
+    </div>
+    {% if model_name == 'category' %}
+    <div class="mb-3">
+        <label class="form-label">Тип</label>
+        <select name="type" class="form-select" required>
+            <option value="">Выберите тип</option>
+            {% for t in types %}
+                <option value="{{ t.id }}" {% if obj and obj.type_id == t.id %}selected{% endif %}>{{ t.name }}</option>
+            {% endfor %}
+        </select>
+    </div>
+    {% endif %}
+    {% if model_name == 'subcategory' %}
+    <div class="mb-3">
+        <label class="form-label">Категория</label>
+        <select name="category" class="form-select" required>
+            <option value="">Выберите категорию</option>
+            {% for c in categories %}
+                <option value="{{ c.id }}" {% if obj and obj.category_id == c.id %}selected{% endif %}>{{ c.name }}</option>
+            {% endfor %}
+        </select>
+    </div>
+    {% endif %}
+    <button type="submit" class="btn btn-success">Сохранить</button>
+    <a href="{% url 'directory_list' model_name %}" class="btn btn-secondary">Отмена</a>
+</form>
+{% endblock %}

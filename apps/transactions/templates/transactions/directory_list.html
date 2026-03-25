@@ -1,0 +1,49 @@
+{% extends 'base.html' %}
+
+{% block title %}Справочник: {{ verbose_name_plural }}{% endblock %}
+
+{% block content %}
+<h2>{{ verbose_name_plural }}</h2>
+<a href="{% url 'directory_create' model_name %}" class="btn btn-primary mb-3">Добавить {{ verbose_name }}</a>
+
+<table class="table table-bordered">
+    <thead>
+        <tr>
+            {% if model_name == 'status' or model_name == 'type' %}
+                <th>ID</th>
+                <th>Название</th>
+            {% elif model_name == 'category' %}
+                <th>ID</th>
+                <th>Название</th>
+                <th>Тип</th>
+            {% elif model_name == 'subcategory' %}
+                <th>ID</th>
+                <th>Название</th>
+                <th>Категория</th>
+            {% endif %}
+            <th>Действия</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for item in items %}
+        <tr>
+            <td>{{ item.id }}</td>
+            <td>{{ item.name }}</td>
+            {% if model_name == 'category' %}
+                <td>{{ item.type.name }}</td>
+            {% endif %}
+            {% if model_name == 'subcategory' %}
+                <td>{{ item.category.name }}</td>
+            {% endif %}
+            <td>
+                <a href="{% url 'directory_edit' model_name item.id %}" class="btn btn-sm btn-warning">✏️</a>
+                <a href="{% url 'directory_delete' model_name item.id %}" class="btn btn-sm btn-danger">🗑️</a>
+            </td>
+        </tr>
+        {% empty %}
+        <tr><td colspan="4" class="text-center">Нет элементов</td></tr>
+        {% endfor %}
+    </tbody>
+</table>
+<a href="{% url 'transaction_list' %}" class="btn btn-secondary">На главную</a>
+{% endblock %}

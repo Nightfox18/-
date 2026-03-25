@@ -1,0 +1,13 @@
+{% extends 'base.html' %}
+
+{% block title %}Удаление {{ obj }}{% endblock %}
+
+{% block content %}
+<h2>Удаление {{ obj }}</h2>
+<p>Вы уверены, что хотите удалить "{{ obj }}" ?</p>
+<form method="post">
+    {% csrf_token %}
+    <button type="submit" class="btn btn-danger">Удалить</button>
+    <a href="{% url 'directory_list' model_name %}" class="btn btn-secondary">Отмена</a>
+</form>
+{% endblock %}

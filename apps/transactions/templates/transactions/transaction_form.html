@@ -1,0 +1,102 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ title }}{% endblock %}
+
+{% block content %}
+<h2>{{ title }}</h2>
+
+<form method="post" id="transactionForm">
+    {% csrf_token %}
+    {{ form.non_field_errors }}
+    <div class="row g-3">
+        <div class="col-md-6">
+            <label class="form-label">Дата</label>
+            {{ form.date }}
+            {{ form.date.errors }}
+        </div>
+        <div class="col-md-6">
+            <label class="form-label">Статус</label>
+            {{ form.status }}
+            {{ form.status.errors }}
+        </div>
+        <div class="col-md-6">
+            <label class="form-label">Тип</label>
+            {{ form.type }}
+            {{ form.type.errors }}
+        </div>
+        <div class="col-md-6">
+            <label class="form-label">Категория</label>
+            {{ form.category }}
+            {{ form.category.errors }}
+        </div>
+        <div class="col-md-6">
+            <label class="form-label">Подкатегория</label>
+            {{ form.subcategory }}
+            {{ form.subcategory.errors }}
+        </div>
+        <div class="col-md-6">
+            <label class="form-label">Сумма (руб.)</label>
+            {{ form.amount }}
+            {{ form.amount.errors }}
+        </div>
+        <div class="col-12">
+            <label class="form-label">Комментарий</label>
+            {{ form.comment }}
+            {{ form.comment.errors }}
+        </div>
+        <div class="col-12">
+            <button type="submit" class="btn btn-success">Сохранить</button>
+            <a href="{% url 'transaction_list' %}" class="btn btn-secondary">Отмена</a>
+        </div>
+    </div>
+</form>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const typeSelect = document.getElementById('id_type');
+        const categorySelect = document.getElementById('id_category');
+        const subcategorySelect = document.getElementById('id_subcategory');
+        
+        function loadCategories() {
+            const typeId = typeSelect.value;
+            if (!typeId) return;
+            fetch(`/api/categories/?type=${typeId}`)
+                .then(response => response.json())
+                .then(data => {
+                    categorySelect.innerHTML = '<option value="">---------</option>';
+                    data.forEach(cat => {
+                        const option = document.createElement('option');
+                        option.value = cat.id;
+                        option.textContent = cat.name;
+                        categorySelect.appendChild(option);
+                    });
+                    loadSubcategories();
+                });
+        }
+        
+        function loadSubcategories() {
+            const categoryId = categorySelect.value;
+            if (!categoryId) return;
+            fetch(`/api/subcategories/?category=${categoryId}`)
+                .then(response => response.json())
+                .then(data => {
+                    subcategorySelect.innerHTML = '<option value="">---------</option>';
+                    data.forEach(sub => {
+                        const option = document.createElement('option');
+                        option.value = sub.id;
+                        option.textContent = sub.name;
+                        subcategorySelect.appendChild(option);
+                    });
+                });
+        }
+        
+        typeSelect.addEventListener('change', loadCategories);
+        categorySelect.addEventListener('change', loadSubcategories);
+        
+        if (typeSelect.value) loadCategories();
+        else if (categorySelect.value) loadSubcategories();
+    });
+</script>
+{% endblock %}
